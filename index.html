@@ -762,6 +762,16 @@ button{ border:none; background:none; cursor:pointer; color:inherit; }
       <span class="sheet-row-text" data-i18n="settings">সেটিংস</span>
       <svg class="sheet-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
     </a>
+
+    <!-- প্রফেশনাল অ্যাপ ইনস্টল বাটন -->
+    <button class="sheet-row" id="btnInstallApp" style="width:100%; text-align:start; background:rgba(31,130,98,0.08); border-radius:14px; margin:4px 0;">
+      <span class="sheet-row-icon" style="background:var(--emerald-700); color:#fff;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </span>
+      <span class="sheet-row-text" style="font-weight:700; color:var(--emerald-600);">অ্যাপ ইনস্টল করুন</span>
+      <span class="badge" style="position:static; background:var(--gold-500); color:var(--emerald-900); font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px;">PWA</span>
+    </button>
+
     <button class="sheet-row danger" id="btnLogout" style="width:100%; text-align:start;">
       <span class="sheet-row-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
       <span class="sheet-row-text" data-i18n="logout">লগআউট</span>
@@ -1506,6 +1516,9 @@ function bindEvents(){
     Theme.apply(chip.dataset.themeChoice);
   });
 
+  // PWA অ্যাপ ইনস্টল বাটন ইভেন্ট
+  document.getElementById('btnInstallApp').addEventListener('click', handleAppInstall);
+
   document.getElementById('btnLogout').addEventListener('click', Auth.logout);
 
   // Auth মডাল হ্যান্ডলিং
@@ -1581,6 +1594,51 @@ async function initApp(){
     setTimeout(()=> skeleton.style.display = 'none', 380);
   }, 450);
 }
+
+/* =========================================================
+   PWA INSTALL HANDLER
+   ========================================================= */
+let deferredInstallPrompt = null;
+
+// ব্রাউজারের ইনস্টল প্রম্পট ক্যাপচার করা
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+});
+
+// ইনস্টল বাটনে ক্লিক করলে যা ঘটবে
+async function handleAppInstall(){
+  // ব্যবহারকারী ইতিমধ্যে ইনস্টল করা অ্যাপে আছে কিনা
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+    showToast('অ্যাপটি ইতিমধ্যে ইনস্টল করা আছে!');
+    closeSheet();
+    return;
+  }
+
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    if (outcome === 'accepted') {
+      showToast('অ্যাপ ইনস্টলেশন শুরু হয়েছে!');
+    }
+    deferredInstallPrompt = null;
+    closeSheet();
+  } else {
+    // iPhone / Safari বা অন্যান্য ব্রাউজার সাপোর্ট
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) {
+      showToast('Safari-র Share বাটনে চেপে "Add to Home Screen" দিন');
+    } else {
+      showToast('ব্রাউজারের ৩-ডট মেনু থেকে "Install App" সিলেক্ট করুন');
+    }
+  }
+}
+
+// ইনস্টল সফল হলে নোটিফিকেশন
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  showToast('অ্যাপটি সফলভাবে ইনস্টল হয়েছে!');
+});
 
 // Service Worker রেজিস্ট্রেশন (PWA সক্রিয় করার জন্য)
 if ('serviceWorker' in navigator) {
