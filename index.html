@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
 <title>আছ সাইর ফাউন্ডেশন</title>
 <meta name="theme-color" content="#0F3D30">
+
+<!-- PWA Manifest & iOS Support -->
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="আছ সাইর">
+<link rel="apple-touch-icon" href="icon-192.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
@@ -1571,6 +1580,15 @@ async function initApp(){
     shell.classList.add('fade-in');
     setTimeout(()=> skeleton.style.display = 'none', 380);
   }, 450);
+}
+
+// Service Worker রেজিস্ট্রেশন (PWA সক্রিয় করার জন্য)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then((reg) => console.log('Service Worker Registered!', reg.scope))
+      .catch((err) => console.error('Service Worker Registration Failed:', err));
+  });
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
