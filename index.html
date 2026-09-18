@@ -836,6 +836,7 @@ button{ border:none; background:none; cursor:pointer; color:inherit; }
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
 <script>
 /* =========================================================
@@ -852,8 +853,8 @@ const APP_CONFIG = {
     appId: "1:431688768914:web:553c12856bcb9c33d9f54b"
   },
   cloudinary: {
-    cloudName: "PASTE_CLOUDINARY_CLOUD_NAME",
-    uploadPreset: "PASTE_UNSIGNED_UPLOAD_PRESET"
+    cloudName: "cvlng3ax",
+    uploadPreset: "As_Sair"
   },
   useDemoDataWhenOffline: true
 };
@@ -988,17 +989,24 @@ const Firebase = {
         this.app = firebase.app();
       }
       this.auth = firebase.auth();
+      this.db = firebase.database();
       AppState.firebaseReady = true;
 
-      // স্বয়ংক্রিয়ভাবে লগইন স্ট্যাটাস চেক করা
-      this.auth.onAuthStateChanged(user => {
+      // স্বয়ংক্রিয়ভাবে লগইন ও রোল চেক
+      this.auth.onAuthStateChanged(async (user) => {
         if (user) {
+          let role = 'member';
+          try {
+            const roleSnap = await Firebase.db.ref(`users/${user.uid}/role`).once('value');
+            if(roleSnap.exists()) role = roleSnap.val();
+          } catch(e){}
+
           Auth.onLoginSuccess({
             uid: user.uid,
             name: user.displayName || user.email?.split('@')[0],
             email: user.email,
             photoURL: user.photoURL,
-            role: 'member'
+            role: role
           });
         } else {
           AppState.user = null;
@@ -1012,6 +1020,38 @@ const Firebase = {
     } catch(e) {
       console.error("Firebase init error:", e);
       return false;
+    }
+  }
+};
+
+/* =========================================================
+   DATABASE — লাইভ ডেটা লোড ও সিঙ্ক লজিক
+   ========================================================= */
+const DB = {
+  async loadDashboard(){
+    try{
+      if(AppState.firebaseReady && Firebase.db){
+        const snap = await Firebase.db.ref('dashboard').once('value');
+        if(snap.exists() && snap.val()){
+          const data = snap.val();
+          return {
+            totals: data.totals || DEMO_DATA.totals,
+            myFund: data.myFund || DEMO_DATA.myFund,
+            chart: data.chart || DEMO_DATA.chart,
+            transactions: data.transactions ? (Array.isArray(data.transactions) ? data.transactions : Object.values(data.transactions)) : DEMO_DATA.transactions,
+            goals: data.goals ? (Array.isArray(data.goals) ? data.goals : Object.values(data.goals)) : DEMO_DATA.goals,
+            announcement: data.announcement || DEMO_DATA.announcement
+          };
+        } else {
+          // ডাটাবেজ প্রথমবার খালি থাকলে ডেমো ডেটা দিয়ে ডাটাবেজ তৈরি করে নেওয়া
+          await Firebase.db.ref('dashboard').set(DEMO_DATA);
+          return DEMO_DATA;
+        }
+      }
+      return DEMO_DATA;
+    }catch(err){
+      console.error('DB load error:', err);
+      return DEMO_DATA;
     }
   }
 };
@@ -1144,27 +1184,7 @@ function openLoginPrompt(){
   openAuthModal('login');
 }
 
-/* =========================================================
-   DATABASE — ডেটা লোড লজিক (Firebase / Demo fallback)
-   ========================================================= */
-const DB = {
-  async loadDashboard(){
-    try{
-      if(Firebase.isConfigured() && AppState.firebaseReady){
-        // TODO(পরবর্তী ধাপ): Firebase Realtime DB / Firestore থেকে read করা হবে
-        // const snap = await firebase.database().ref('dashboard').once('value');
-        // return snap.val();
-        return DEMO_DATA;
-      } else if(APP_CONFIG.useDemoDataWhenOffline){
-        return DEMO_DATA;
-      }
-      throw new Error('no-source');
-    }catch(err){
-      console.error('DB load error:', err);
-      return null;
-    }
-  }
-};
+
 
 /* =========================================================
    THEME — থিম সিস্টেম
