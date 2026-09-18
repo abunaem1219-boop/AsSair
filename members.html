@@ -780,6 +780,8 @@ const FirebaseManager = {
       const val = snap.val();
       if(val){
         State.classes = Array.isArray(val) ? val : Object.values(val);
+      } else {
+        db.ref('classes').set(State.classes);
       }
       renderClassFilters();
       populateClassSelect();
@@ -791,10 +793,15 @@ const FirebaseManager = {
       if(val){
         State.members = Object.keys(val).map(key => ({ ...val[key], _key: key }));
       } else {
+        // ফায়ারবেস খালি থাকলে ডেমো ডেটা আপলোড করা
+        const initialObj = {};
+        DEMO_MEMBERS.forEach(m => initialObj[m.id] = m);
+        db.ref('members').set(initialObj);
         State.members = DEMO_MEMBERS;
       }
       renderMembersList();
     }, err => {
+      console.warn("Database read warning:", err);
       State.members = DEMO_MEMBERS;
       renderMembersList();
     });
