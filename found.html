@@ -705,6 +705,11 @@ input, select{ color:var(--text-primary); }
 
 <div class="toast" id="toast"></div>
 
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
 <script>
 /* =========================================================
    CONFIG — কনফিগারেশন (index.html-এর সাথে অভিন্ন প্লেসহোল্ডার)
@@ -828,68 +833,129 @@ const translations = {
 function t(key){ return (translations[AppState.lang] || translations.bn)[key] || key; }
 
 /* =========================================================
-   DEMO DATA
+   DEMO DATA (ফাঁকা ও শূন্য হিসাব)
    ========================================================= */
 const DEMO_DATA = {
-  totals:{ totalFund:1250000, totalCollection:980000, totalExpense:412000, investment:300000, profit:87000, available:568000 },
-  breakdown:[
-    { key:'memberContribution', value:620000, color:'#1B6E54' },
-    { key:'investment', value:300000, color:'#3F6FB0' },
-    { key:'investmentProfit', value:87000, color:'#C9A24B' },
-    { key:'otherIncome', value:60000, color:'#8C978F' },
-    { key:'expense', value:412000, color:'#B4483C' }
-  ],
-  chart:{
-    '1m':[62,70,65,80,75,90,88],
-    '6m':[40,55,50,65,60,78,72,85,80,92,88,95],
-    '1y':[30,35,32,40,45,42,50,55,58,62,68,75],
-    'all':[10,15,18,22,20,28,35,40,45,52,60,68,72,80,85,90]
+  totals: { 
+    totalFund: 0, 
+    totalCollection: 0, 
+    totalExpense: 0, 
+    investment: 0, 
+    profit: 0, 
+    available: 0 
   },
-  myFund:{
-    monthly:1000, totalPaid:24000, totalDue:2000, lastPayment:'২০ জুলাই, ২০২৬', status:'paid',
-    months:[
-      {m:'জানু', status:'paid'},{m:'ফেব্রু', status:'paid'},{m:'মার্চ', status:'paid'},
-      {m:'এপ্রি', status:'paid'},{m:'মে', status:'partial'},{m:'জুন', status:'paid'},
-      {m:'জুলাই', status:'paid'},{m:'আগস্ট', status:'due'}
-    ]
+  breakdown: [],
+  chart: {
+    '1m': [],
+    '6m': [],
+    '1y': [],
+    'all': []
   },
-  transactions:[
-    { type:'income', desc:'জুলাই মাসের চাঁদা — মো. রহিম উদ্দিন', amount:1000, date:'২০ জুলাই, ২০২৬', addedBy:'অ্যাডমিন', hasReceipt:true, receiptId:'RC-2026-0714' },
-    { type:'expense', desc:'এতিমখানায় খাদ্য সহায়তা', amount:8500, date:'১৮ জুলাই, ২০২৬', addedBy:'মডারেটর সাকিব', hasReceipt:false },
-    { type:'investment', desc:'পোল্ট্রি প্রজেক্টে বিনিয়োগ', amount:50000, date:'১৭ জুলাই, ২০২৬', addedBy:'অ্যাডমিন', hasReceipt:false },
-    { type:'income', desc:'বিশেষ অনুদান — আব্দুল করিম', amount:5000, date:'১৫ জুলাই, ২০২৬', addedBy:'অ্যাডমিন', hasReceipt:true, receiptId:'RC-2026-0698' },
-    { type:'expense', desc:'অফিস ভাড়া পরিশোধ', amount:5000, date:'১২ জুলাই, ২০২৬', addedBy:'অ্যাডমিন', hasReceipt:false }
-  ],
-  investments:[
-    { name:'পোল্ট্রি প্রজেক্ট', initial:50000, current:58000, date:'১০ জানু, ২০২৬', status:'active' },
-    { name:'কৃষি জমি ভাড়া', initial:100000, current:96000, date:'০৫ মার্চ, ২০২৬', status:'active' },
-    { name:'ক্ষুদ্র ব্যবসা ঋণ', initial:30000, current:34500, date:'২২ ডিসে, ২০২৫', status:'completed' },
-    { name:'নতুন প্রজেক্ট প্রস্তাব', initial:0, current:0, date:'—', status:'pending' }
-  ],
-  goals:[
-    { title:'হজ্জ ফান্ড', icon:'kaaba', target:1000000, collected:420000 },
-    { title:'ফাউন্ডেশন ট্যুর', icon:'plane', target:200000, collected:95000 }
-  ]
+  myFund: {
+    monthly: 0, 
+    totalPaid: 0, 
+    totalDue: 0, 
+    lastPayment: '—', 
+    status: 'due',
+    months: []
+  },
+  transactions: [],
+  investments: [],
+  goals: []
 };
 
 /* =========================================================
    FIREBASE
    ========================================================= */
 const Firebase = {
+  app: null,
+  auth: null,
+  db: null,
   isConfigured(){ const c = APP_CONFIG.firebase; return c.apiKey && !c.apiKey.startsWith('PASTE_'); },
   async init(){
-    if(!this.isConfigured()){ AppState.firebaseReady = false; return false; }
-    // TODO(পরবর্তী ধাপ): firebase.initializeApp(APP_CONFIG.firebase)
-    AppState.firebaseReady = true;
-    return true;
+    if(!this.isConfigured() || typeof firebase === 'undefined'){ AppState.firebaseReady = false; return false; }
+    try {
+      if(!firebase.apps.length){
+        this.app = firebase.initializeApp(APP_CONFIG.firebase);
+      } else {
+        this.app = firebase.app();
+      }
+      this.auth = firebase.auth();
+      this.db = firebase.database();
+      AppState.firebaseReady = true;
+
+      this.auth.onAuthStateChanged(user => {
+        if(user){
+          AppState.user = {
+            uid: user.uid,
+            name: user.displayName || user.email.split('@')[0],
+            email: user.email,
+            photoURL: user.photoURL,
+            role: 'admin' // অ্যাডমিন পারমিশন
+          };
+          AppState.isLoggedIn = true;
+        } else {
+          AppState.user = null;
+          AppState.isLoggedIn = false;
+        }
+        renderProfile();
+        renderMyFund();
+        renderActionRow();
+        renderBottomNav();
+      });
+      return true;
+    } catch(e) {
+      console.error("Firebase init error:", e);
+      return false;
+    }
   },
   async saveEntry(type, payload){
-    // TODO(পরবর্তী ধাপ): firebase.database().ref('transactions').push(payload)
-    return new Promise(resolve => setTimeout(()=> resolve({ ok:true }), 900));
+    try {
+      if(this.db){
+        const txRef = this.db.ref('dashboard/transactions').push();
+        await txRef.set({ ...payload, id: txRef.key });
+        
+        // ড্যাশবোর্ড ফান্ড টোটাল আপডেট
+        const totalsRef = this.db.ref('dashboard/totals');
+        const snap = await totalsRef.once('value');
+        let currentTotals = snap.val() || DEMO_DATA.totals;
+
+        if(type === 'income'){
+          currentTotals.totalFund = (currentTotals.totalFund || 0) + payload.amount;
+          currentTotals.totalCollection = (currentTotals.totalCollection || 0) + payload.amount;
+          currentTotals.available = (currentTotals.available || 0) + payload.amount;
+        } else if(type === 'expense'){
+          currentTotals.totalFund = (currentTotals.totalFund || 0) - payload.amount;
+          currentTotals.totalExpense = (currentTotals.totalExpense || 0) + payload.amount;
+          currentTotals.available = (currentTotals.available || 0) - payload.amount;
+        } else if(type === 'investment'){
+          currentTotals.investment = (currentTotals.investment || 0) + payload.amount;
+          currentTotals.available = (currentTotals.available || 0) - payload.amount;
+        }
+        await totalsRef.set(currentTotals);
+        return { ok: true };
+      }
+      return { ok: true };
+    } catch(err){
+      console.error(err);
+      return { ok: false };
+    }
   },
   async uploadToCloudinary(file){
-    // TODO(পরবর্তী ধাপ): unsigned POST -> https://api.cloudinary.com/v1_1/{cloudName}/upload
-    return new Promise(resolve => setTimeout(()=> resolve({ url:null }), 500));
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', APP_CONFIG.cloudinary.uploadPreset);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${APP_CONFIG.cloudinary.cloudName}/auto/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      return { url: data.secure_url };
+    } catch(e){
+      console.warn("Cloudinary upload failed:", e);
+      return { url: null };
+    }
   }
 };
 
@@ -898,10 +964,18 @@ const Firebase = {
    ========================================================= */
 const Auth = {
   async signInWithGoogle(){
-    if(!Firebase.isConfigured()){ showToast(t('connError')); return; }
-    // TODO(পরবর্তী ধাপ): firebase.auth().signInWithPopup(googleProvider)
+    if(!Firebase.auth){ showToast(t('connError')); return; }
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      await Firebase.auth.signInWithPopup(provider);
+      showToast('লগইন সফল হয়েছে!');
+    } catch(e){
+      console.error(e);
+      showToast(e.message || t('connError'));
+    }
   },
-  logout(){
+  async logout(){
+    if(Firebase.auth) await Firebase.auth.signOut();
     AppState.user = null; AppState.isLoggedIn = false;
     renderProfile(); renderMyFund(); renderActionRow(); renderBottomNav(); closeSheet('moreSheet');
     showToast(AppState.lang==='bn' ? 'লগআউট সম্পন্ন হয়েছে' : 'Logged out successfully');
@@ -914,16 +988,28 @@ const Auth = {
 const DB = {
   async loadFundData(){
     try{
-      if(Firebase.isConfigured() && AppState.firebaseReady){
-        // TODO(পরবর্তী ধাপ): Firebase থেকে read করা হবে
-        return DEMO_DATA;
-      } else if(APP_CONFIG.useDemoDataWhenOffline){
-        return DEMO_DATA;
+      if(AppState.firebaseReady && Firebase.db){
+        const snap = await Firebase.db.ref('dashboard').once('value');
+        if(snap.exists() && snap.val()){
+          const val = snap.val();
+          return {
+            totals: val.totals || DEMO_DATA.totals,
+            breakdown: val.breakdown || DEMO_DATA.breakdown,
+            chart: val.chart || DEMO_DATA.chart,
+            myFund: val.myFund || DEMO_DATA.myFund,
+            transactions: val.transactions ? (Array.isArray(val.transactions) ? val.transactions : Object.values(val.transactions)) : DEMO_DATA.transactions,
+            investments: val.investments || DEMO_DATA.investments,
+            goals: val.goals ? (Array.isArray(val.goals) ? val.goals : Object.values(val.goals)) : DEMO_DATA.goals
+          };
+        } else {
+          await Firebase.db.ref('dashboard').set(DEMO_DATA);
+          return DEMO_DATA;
+        }
       }
-      throw new Error('no-source');
+      return DEMO_DATA;
     }catch(err){
       console.error('DB load error:', err);
-      return null;
+      return DEMO_DATA;
     }
   }
 };
