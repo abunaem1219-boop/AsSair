@@ -892,56 +892,11 @@ function t(k){ return (translations[AppState.lang] || translations.bn)[k] || k; 
    ০৩. ডেমো ও ফলব্যাক ডেটাবেস
    ========================================================= */
 const DEMO_CONVERSATIONS = [
-  {
-    id: "foundation_group",
-    name: "আছ সাইর ফাউন্ডেশন",
-    isGroup: true,
-    avatar: null,
-    unreadCount: 3,
-    pinnedMessage: "জরুরি নোটিশ: আগামী ৩০ আগস্ট বাদ জুমা সাধারণ সভা অনুষ্ঠিত হবে।",
-    lastMessage: { text: "সবাই সময়মত উপস্থিত থাকার চেষ্টা করবেন ইনশাআল্লাহ।", timestamp: Date.now() - 1000*60*15, senderName: "আব্দুল্লাহ আল মামুন" }
-  },
-  {
-    id: "user_2",
-    name: "মো. রহিম উদ্দিন",
-    isGroup: false,
-    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop",
-    online: true,
-    unreadCount: 2,
-    lastMessage: { text: "ভাই আমার জুলাই মাসের জমার রসিদটা পেয়েছেন?", timestamp: Date.now() - 1000*60*60, senderName: "মো. রহিম উদ্দিন" }
-  },
-  {
-    id: "user_3",
-    name: "সালমা খাতুন",
-    isGroup: false,
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop",
-    online: false,
-    unreadCount: 0,
-    lastMessage: { text: "ধন্যবাদ ভাইয়া!", timestamp: Date.now() - 1000*60*60*5, senderName: "সালমা খাতুন" }
-  },
-  {
-    id: "user_4",
-    name: "ইঞ্জি. তারেক হাসান",
-    isGroup: false,
-    avatar: null,
-    online: true,
-    unreadCount: 0,
-    lastMessage: { text: "প্রজেক্টের নতুন আপডেট আপলোড করা হয়েছে।", timestamp: Date.now() - 1000*60*60*24, senderName: "ইঞ্জি. তারেক হাসান" }
-  }
+
 ];
 
 const DEMO_MESSAGES = {
-  "foundation_group": [
-    { messageId:"m1", senderId:"u_admin", senderName:"আব্দুল্লাহ আল মামুন", text:"আসসালামু আলাইকুম সবাইকে। ফাউন্ডেশনের পক্ষ থেকে আন্তরিক শুভেচ্ছা।", type:"text", timestamp: Date.now() - 1000*60*120, status:"seen" },
-    { messageId:"m2", senderId:"current_user", senderName:"আমি", text:"ওয়া আলাইকুমুস সালাম ওয়ারাহমাতুল্লাহ।", type:"text", timestamp: Date.now() - 1000*60*90, status:"seen" },
-    { messageId:"m3", senderId:"u_2", senderName:"মো. রহিম উদ্দিন", text:"মাশাআল্লাহ! নতুন কল্যাণ তহবিলের কাজ কতদূর এগুলো?", type:"text", timestamp: Date.now() - 1000*60*40, status:"seen" },
-    { messageId:"m4", senderId:"u_admin", senderName:"আব্দুল্লাহ আল মামুন", text:"সবাই সময়মত উপস্থিত থাকার চেষ্টা করবেন ইনশাআল্লাহ।", type:"text", timestamp: Date.now() - 1000*60*15, status:"delivered" }
-  ],
-  "user_2": [
-    { messageId:"m20", senderId:"current_user", senderName:"আমি", text:"আসসালামু আলাইকুম ভাই, কেমন আছেন?", type:"text", timestamp: Date.now() - 1000*60*90, status:"seen" },
-    { messageId:"m21", senderId:"user_2", senderName:"মো. রহিম উদ্দিন", text:"ওয়া আলাইকুমুস সালাম। আলহামদুলিল্লাহ ভালো আছি।", type:"text", timestamp: Date.now() - 1000*60*80, status:"seen" },
-    { messageId:"m22", senderId:"user_2", senderName:"মো. রহিম উদ্দিন", text:"ভাই আমার জুলাই মাসের জমার রসিদটা পেয়েছেন?", type:"text", timestamp: Date.now() - 1000*60*60, status:"delivered" }
-  ]
+
 };
 
 /* =========================================================
@@ -1039,13 +994,14 @@ function renderConversationList(list = DEMO_CONVERSATIONS){
   }).join('');
 }
 
+let currentMsgListener = null;
+
 function openConversation(convId){
   const conv = DEMO_CONVERSATIONS.find(c => c.id === convId);
   if(!conv) return;
   AppState.activeConversation = conv;
-  conv.unreadCount = 0; // অপঠিত পড়া হয়েছে মার্ক করা
+  conv.unreadCount = 0;
 
-  // হেডারে ডেটা সেট
   document.getElementById('threadName').textContent = conv.name;
   const avBox = document.getElementById('threadAvatar');
   if(conv.isGroup){
@@ -1060,7 +1016,6 @@ function openConversation(convId){
     document.getElementById('threadStatus').textContent = conv.online ? t('activeNow') : t('offline');
   }
 
-  // পিন ব্যানার
   const pinBanner = document.getElementById('pinnedBanner');
   if(conv.pinnedMessage){
     document.getElementById('pinnedBannerText').textContent = conv.pinnedMessage;
@@ -1069,9 +1024,21 @@ function openConversation(convId){
     pinBanner.classList.remove('show');
   }
 
-  renderMessages(conv.id);
+  // ফায়ারবেস থেকে লাইভ মেসেজ শোনা
+  if(Firebase.db){
+    if(currentMsgListener) Firebase.db.ref(`conversations/${convId}/messages`).off('value', currentMsgListener);
+    currentMsgListener = Firebase.db.ref(`conversations/${convId}/messages`).on('value', snap => {
+      if(snap.exists() && snap.val()){
+        DEMO_MESSAGES[convId] = Object.values(snap.val());
+      }
+      renderMessages(convId);
+    });
+  } else {
+    renderMessages(conv.id);
+  }
+
   document.getElementById('threadScreen').classList.add('active');
-  renderConversationList(); // আনরিড ব্যাজ আপডেট
+  renderConversationList();
 }
 
 function closeConversation(){
