@@ -1,0 +1,138 @@
+{
+  "rules": {
+    "settings": {
+      ".read": "auth != null",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')"
+    },
+    "users": {
+      "$uid": {
+        ".read": "auth != null && ($uid === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')",
+        ".write": "auth != null && ($uid === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')",
+        "role": {
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')"
+        }
+      }
+    },
+    "members": {
+      ".read": "auth != null",
+      "$memberId": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')"
+      }
+    },
+    "deposits": {
+      ".read": "auth != null",
+      "$depositId": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')",
+        ".validate": "newData.hasChildren(['amount', 'paymentDate', 'memberId']) && newData.child('amount').val() > 0"
+      }
+    },
+    "receipts": {
+      ".read": "auth != null",
+      "$receiptId": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')"
+      }
+    },
+    "expenses": {
+      ".read": "auth != null",
+      "$expenseId": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')",
+        ".validate": "newData.hasChildren(['amount', 'purpose', 'category']) && newData.child('amount').val() > 0"
+      }
+    },
+    "loans": {
+      ".read": "auth != null",
+      "$loanId": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')",
+        ".validate": "newData.hasChildren(['amount', 'borrowerName', 'status']) && newData.child('amount').val() > 0"
+      }
+    },
+    "loanRepayments": {
+      ".read": "auth != null",
+      "$repayId": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')",
+        ".validate": "newData.hasChildren(['amount', 'loanId']) && newData.child('amount').val() > 0"
+      }
+    },
+    "investments": {
+      ".read": "auth != null",
+      "$invId": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')",
+        ".validate": "newData.hasChildren(['amount', 'name']) && newData.child('amount').val() > 0"
+      }
+    },
+    "investmentReturns": {
+      ".read": "auth != null",
+      "$retId": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')"
+      }
+    },
+    "notices": {
+      ".read": "auth != null",
+      "$noticeId": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'moderator' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')"
+      }
+    },
+    "notifications": {
+      ".read": "auth != null",
+      "$notifId": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')",
+        "readBy": {
+          "$uid": {
+            ".write": "auth != null && $uid === auth.uid"
+          }
+        }
+      }
+    },
+    "messages": {
+      ".read": "auth != null",
+      "$msgId": {
+        ".write": "auth != null && (!data.exists() || data.child('senderUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'moderator' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')",
+        "reactions": {
+          "$uid": {
+            ".write": "auth != null && $uid === auth.uid"
+          }
+        }
+      }
+    },
+    "posts": {
+      ".read": "auth != null",
+      "$postId": {
+        ".write": "auth != null && (!data.exists() || data.child('authorUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'moderator' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')",
+        "likes": {
+          "$uid": {
+            ".write": "auth != null && $uid === auth.uid"
+          }
+        }
+      }
+    },
+    "comments": {
+      ".read": "auth != null",
+      "$commentId": {
+        ".write": "auth != null && (!data.exists() || data.child('authorUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'moderator' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')"
+      }
+    },
+    "gallery": {
+      ".read": "auth != null",
+      "$itemId": {
+        ".write": "auth != null && (!data.exists() || data.child('uploaderUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'moderator' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')"
+      }
+    },
+    "events": {
+      ".read": "auth != null",
+      "$eventId": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')",
+        "attendees": {
+          "$uid": {
+            ".write": "auth != null && $uid === auth.uid"
+          }
+        }
+      }
+    },
+    "auditLogs": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')",
+      "$logId": {
+        ".write": "auth != null && !data.exists() && (root.child('users').child(auth.uid).child('role').val() === 'superAdmin' || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.uid === 'UccjJ23kFie3YyUMOiihiPrjO6S2')"
+      }
+    }
+  }
+}

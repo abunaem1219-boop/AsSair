@@ -1,0 +1,8 @@
+{
+  "name": "As Sair",
+  "description": "A private organizational fund-management, monthly savings, loan & investment tracking, and community platform for As Sair with Hajj fund goals.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
