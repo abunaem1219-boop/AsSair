@@ -234,6 +234,15 @@ export const translations = {
     actionSuccess: 'সফলভাবে সম্পন্ন হয়েছে',
     errorOccurred: 'একটি সমস্যা দেখা দিয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।',
     allRightsReserved: 'সর্বস্বত্ব সংরক্ষিত © আস-সাইর',
+
+    // Mobile Header / Status Bar
+    mobileHeaderSettings: 'মোবাইল হেডার ও স্ট্যাটাস বার',
+    mobileHeaderSettingsDesc: 'ফোনের ঘড়ি, ব্যাটারি, নেটওয়ার্ক ও নচ থেকে হেডারের দূরত্ব নির্ধারণ করুন',
+    statusBarSpacing: 'স্ট্যাটাস বার স্পেসিং',
+    statusBarNormal: 'ডিফল্ট (৩২px) - স্বাভাবিক',
+    statusBarTall: 'বড় নচ / পাঞ্চ-হোল (৪২px)',
+    statusBarCompact: 'ছোট স্পেসিং (২৪px)',
+    statusBarNone: 'স্পেসিং নেই (০px)',
   },
 
   en: {
@@ -469,5 +478,14 @@ export const translations = {
     actionSuccess: 'Action completed successfully',
     errorOccurred: 'An error occurred. Please try again.',
     allRightsReserved: 'All Rights Reserved © As Sair',
+
+    // Mobile Header / Status Bar
+    mobileHeaderSettings: 'Mobile Header & Status Bar',
+    mobileHeaderSettingsDesc: 'Adjust spacing for mobile clock, battery, network, and camera notch',
+    statusBarSpacing: 'Status Bar Spacing',
+    statusBarNormal: 'Default (32px) - Standard',
+    statusBarTall: 'Large Notch / Punch-hole (42px)',
+    statusBarCompact: 'Compact Spacing (24px)',
+    statusBarNone: 'No Spacing (0px)',
   }
 };

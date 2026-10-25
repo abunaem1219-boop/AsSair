@@ -45,6 +45,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab }) =
 
   return (
     <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-4 shrink-0">
+      {/* Sidebar Brand Header */}
+      <div
+        className="flex items-center gap-3 px-2 pb-4 mb-4 border-b border-slate-100 dark:border-slate-800 cursor-pointer group"
+        onClick={() => setCurrentTab('home')}
+      >
+        <div className="w-10 h-10 rounded-xl bg-white p-0.5 shadow-xs border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
+          <img
+            src={settings.orgLogoUrl || '/logo.jpg'}
+            alt="As-Sair Logo"
+            className="w-full h-full object-contain rounded-lg"
+          />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="font-extrabold text-sm text-slate-800 dark:text-white truncate">
+            {settings.orgName || t('appName')}
+          </h2>
+          <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium truncate">
+            {settings.orgTagline || 'Foundation & Fund'}
+          </p>
+        </div>
+      </div>
+
       {/* Quick Fund Mini-widget */}
       <div className="mb-6 p-4 rounded-2xl bg-gradient-to-br from-emerald-800 to-emerald-950 text-white shadow-lg relative overflow-hidden">
         <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-emerald-600/20 rounded-full blur-xl" />

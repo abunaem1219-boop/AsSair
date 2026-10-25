@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { translations, Language } from '../i18n/translations';
 
 type ThemeMode = 'light' | 'dark';
+export type StatusBarSpacing = 'default' | 'tall' | 'compact' | 'none';
 
 interface ThemeLanguageContextType {
   language: Language;
@@ -11,6 +12,8 @@ interface ThemeLanguageContextType {
   toggleTheme: () => void;
   formatCurrency: (amount: number) => string;
   formatDate: (dateStr: string | number) => string;
+  statusBarSpacing: StatusBarSpacing;
+  setStatusBarSpacing: (spacing: StatusBarSpacing) => void;
 }
 
 const ThemeLanguageContext = createContext<ThemeLanguageContextType | undefined>(undefined);
@@ -27,6 +30,14 @@ export const ThemeLanguageProvider: React.FC<{ children: React.ReactNode }> = ({
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
+  const [statusBarSpacing, setStatusBarSpacingState] = useState<StatusBarSpacing>(() => {
+    const saved = localStorage.getItem('as_sair_status_bar_spacing') as StatusBarSpacing;
+    if (saved === 'default' || saved === 'tall' || saved === 'compact' || saved === 'none') {
+      return saved;
+    }
+    return 'default'; // Default on mobile: 32px safe header
+  });
+
   useEffect(() => {
     localStorage.setItem('as_sair_lang', language);
     document.documentElement.lang = language;
@@ -40,6 +51,14 @@ export const ThemeLanguageProvider: React.FC<{ children: React.ReactNode }> = ({
       document.documentElement.classList.remove('dark');
     }
   }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem('as_sair_status_bar_spacing', statusBarSpacing);
+  }, [statusBarSpacing]);
+
+  const setStatusBarSpacing = (spacing: StatusBarSpacing) => {
+    setStatusBarSpacingState(spacing);
+  };
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
@@ -100,6 +119,8 @@ export const ThemeLanguageProvider: React.FC<{ children: React.ReactNode }> = ({
         toggleTheme,
         formatCurrency,
         formatDate,
+        statusBarSpacing,
+        setStatusBarSpacing,
       }}
     >
       {children}

@@ -93,11 +93,14 @@ interface DataContextType {
 const defaultSettings: OrgSettings = {
   orgName: 'আস-সাইর',
   orgTagline: 'তহবিল ব্যবস্থাপনা ও কল্যাণ সমিতি',
+  orgLogoUrl: '/logo.jpg',
   hajjGoalTarget: 1500000, // ৳15,00,000 for Hajj group travel goal
   defaultMonthlyContribution: 1000,
   orgDescription: 'আস-সাইর একটি প্রাইভেট সংগঠন। এখানে প্রতি মাসে সদস্যরা নির্দিষ্ট সঞ্চয় জমা করেন এবং দীর্ঘমেয়াদে হজ্জের সফর ও সামাজিক কল্যাণ লক্ষ্য হিসেবে নির্ধারিত।',
   contactPhone: '+880 1700-000000',
   contactEmail: 'info@as-sair.org',
+  cloudinaryCloudName: 'dinbje135',
+  cloudinaryUploadPreset: 'As_sair',
   currencySymbol: '৳',
 };
 
@@ -142,7 +145,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     unsubscribes.push(
       onValue(ref(rtdb, 'settings'), (snapshot) => {
         if (snapshot.exists()) {
-          setSettings({ ...defaultSettings, ...snapshot.val() });
+          const loaded = { ...defaultSettings, ...snapshot.val() };
+          setSettings(loaded);
+          if (loaded.cloudinaryCloudName) {
+            localStorage.setItem('as_sair_cloud_name', loaded.cloudinaryCloudName);
+          }
+          if (loaded.cloudinaryUploadPreset) {
+            localStorage.setItem('as_sair_upload_preset', loaded.cloudinaryUploadPreset);
+          }
         } else {
           // Initialize default settings if empty
           set(ref(rtdb, 'settings'), defaultSettings);

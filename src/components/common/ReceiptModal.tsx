@@ -84,8 +84,12 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
 
           {/* Header */}
           <div className="text-center border-b-2 border-dashed border-slate-200 dark:border-slate-800 pb-5">
-            <div className="w-12 h-12 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-bold text-xl mx-auto shadow-md mb-2">
-              س
+            <div className="w-16 h-16 rounded-2xl bg-white p-1 shadow-md border border-emerald-200 dark:border-emerald-800 mx-auto mb-2 overflow-hidden flex items-center justify-center">
+              <img
+                src={settings.orgLogoUrl || '/logo.jpg'}
+                alt="As-Sair Foundation Logo"
+                className="w-full h-full object-contain rounded-xl"
+              />
             </div>
             <h2 className="text-2xl font-black tracking-tight text-emerald-800 dark:text-emerald-400">
               {settings.orgName || 'আস-সাইর (AS SAIR)'}

@@ -9,6 +9,21 @@
   }
 }
 
+/* Safe Area Inset Support for Mobile Notches & Navigation Bars */
+:root {
+  --app-status-bar-height: max(32px, env(safe-area-inset-top, 32px));
+  --app-safe-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+}
+
+.status-bar-header-spacer {
+  height: var(--app-status-bar-height);
+  min-height: 28px;
+}
+
+.pb-safe {
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));
+}
+
 /* Islamic Geometric Pattern Subtle Accent */
 .islamic-pattern {
   background-color: #064e3b;

@@ -91,9 +91,18 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         <div className="absolute -right-8 -top-8 w-44 h-44 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-800/80 text-emerald-200 text-xs font-semibold mb-2 border border-emerald-700/60">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>{settings.orgTagline || t('appSubTitle')}</span>
+            <div className="flex items-center gap-2.5 mb-2.5">
+              <div className="w-10 h-10 rounded-xl bg-white p-0.5 shadow-md flex items-center justify-center shrink-0 border border-emerald-400/40 overflow-hidden">
+                <img
+                  src={settings.orgLogoUrl || '/logo.jpg'}
+                  alt="As-Sair Foundation"
+                  className="w-full h-full object-contain rounded-lg"
+                />
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-800/80 text-emerald-200 text-xs font-semibold border border-emerald-700/60">
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span>{settings.orgTagline || t('appSubTitle')}</span>
+              </div>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
               {language === 'bn' ? 'আসসালামু আলাইকুম,' : 'Assalamu Alaikum,'}{' '}

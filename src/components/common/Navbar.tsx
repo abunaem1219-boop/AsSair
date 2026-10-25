@@ -25,11 +25,21 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpenLogin }) => {
   const { currentUser, userProfile, role, isAdmin, isSuperAdmin, logout } = useAuth();
-  const { language, setLanguage, t, theme, toggleTheme } = useThemeLanguage();
+  const { language, setLanguage, t, theme, toggleTheme, statusBarSpacing } = useThemeLanguage();
   const { notifications, markNotificationAsRead, settings } = useData();
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Status bar height based on setting (defaults to 32px safe height on mobile)
+  const statusBarHeightPx =
+    statusBarSpacing === 'tall'
+      ? 42
+      : statusBarSpacing === 'compact'
+      ? 24
+      : statusBarSpacing === 'none'
+      ? 0
+      : 32;
 
   // Unread notifications count for current user
   const unreadCount = notifications.filter(
@@ -70,28 +80,44 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-emerald-900 text-white shadow-md select-none">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <header className="sticky top-0 z-40 bg-emerald-900 dark:bg-emerald-950 text-white shadow-md select-none border-b border-emerald-800/40 transition-colors">
+      {/* Mobile Top Status Bar Header (অ্যাপের থিমের সাথে মিলিয়ে টপ হেডার যাতে টাইম ও ব্যাটারিতে লেখা না মিশে) */}
+      {statusBarHeightPx > 0 && (
+        <div
+          className="w-full sm:hidden bg-emerald-950 dark:bg-slate-950/90 border-b border-emerald-800/30 transition-all pointer-events-none"
+          style={{
+            height: `max(${statusBarHeightPx}px, env(safe-area-inset-top, ${statusBarHeightPx}px))`,
+          }}
+          aria-hidden="true"
+        />
+      )}
+
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Brand Logo & Name */}
           <div
-            className="flex items-center gap-3 cursor-pointer group"
+            className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group"
             onClick={() => setCurrentTab('home')}
           >
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-400 p-0.5 shadow-md flex items-center justify-center transition-transform group-hover:scale-105">
-              <div className="w-full h-full bg-emerald-950 rounded-[14px] flex items-center justify-center font-serif text-emerald-300 text-xl font-black">
-                س
-              </div>
+            <div className="w-10 h-10 rounded-xl sm:rounded-2xl bg-white p-0.5 shadow-md flex items-center justify-center transition-transform group-hover:scale-105 overflow-hidden shrink-0 border border-emerald-400/40">
+              <img
+                src={settings.orgLogoUrl || '/logo.jpg'}
+                alt="As-Sair Foundation Logo"
+                className="w-full h-full object-contain rounded-lg sm:rounded-xl"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-lg sm:text-xl tracking-tight text-white group-hover:text-emerald-300 transition-colors">
+                <span className="font-extrabold text-base sm:text-xl tracking-tight text-white group-hover:text-emerald-300 transition-colors">
                   {settings.orgName || t('appName')}
                 </span>
                 {currentUser && getRoleBadge()}
               </div>
               <p className="text-[11px] text-emerald-200/80 -mt-1 hidden sm:block">
-                {t('appSubTitle')}
+                {settings.orgTagline || t('appSubTitle')}
               </p>
             </div>
           </div>

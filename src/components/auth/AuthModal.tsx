@@ -117,8 +117,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       <div className="space-y-4">
         {/* Banner with App emblem & Super Admin hint */}
         <div className="text-center pb-1">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-700 text-emerald-200 flex items-center justify-center font-serif text-2xl font-black mx-auto mb-2 shadow-md">
-            س
+          <div className="w-16 h-16 rounded-2xl bg-white p-1 shadow-md border border-emerald-200 dark:border-emerald-800 mx-auto mb-2 overflow-hidden flex items-center justify-center">
+            <img
+              src="/logo.jpg"
+              alt="As-Sair Foundation Logo"
+              className="w-full h-full object-contain rounded-xl"
+            />
           </div>
           <h4 className="font-extrabold text-base text-emerald-900 dark:text-emerald-300">
             {t('appName')}
